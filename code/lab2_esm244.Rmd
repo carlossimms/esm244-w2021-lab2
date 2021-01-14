@@ -17,7 +17,7 @@ library(here)
 # For PCA:
 library(ggfortify)
 
-# For ggplot Customization:
+# For 'ggplot()' Customization:
 library(readxl)
 library(gghighlight)
 library(lubridate)
@@ -51,11 +51,70 @@ autoplot(penguin_pca, # To create a complete ggplot appropriate to a particular 
   theme_minimal()
 ```
 
+## Part 2: 'ggplot2' Customization and Reading in Different File Types
 
+#### Read in an .xlsx file and do some wrangling
 
+```{r}
+fish_noaa <- read_excel(here("data", 
+                             "foss_landings.xlsx")) %>% 
+  clean_names() %>% 
+  mutate(across(where(is.character), 
+                tolower)) %>% # To say mutate columns "across" where a certain character class is, and make those a lower character class.
+  mutate(nmfs_name = str_sub(nmfs_name, 
+                             end = -4)) %>% # To extract and replace substrings from a character vector.
+  filter(confidentiality == "public")
+```
 
+#### Make a customized gragh
 
+```{r}
+fish_plot <- ggplot(data = fish_noaa, # To store a graph.
+                    aes(x = year, 
+                        y = pounds)) + 
+  geom_line(aes(color = nmfs_name), 
+            show.legend = FALSE) + 
+  theme_minimal()
 
+fish_plot # To show a stored graph (there are so many species that it only output the legend - use 'show.legend = FALSE' to instead show the line graph). 
+
+ggplotly(fish_plot) # To create an interactive graph.
+
+ggplot(data = fish_noaa, 
+       aes(x = year, 
+           y = pounds, 
+           group = nmfs_name)) + 
+  geom_line() + 
+  theme_minimal() + 
+  gghighlight(nmfs_name == "tunas") # To highlight a certain series.
+
+ggplot(data = fish_noaa, 
+       aes(x = year, 
+           y = pounds, 
+           group = nmfs_name)) + 
+  geom_line(aes(colour = nmfs_name)) + 
+  theme_minimal() + 
+  gghighlight(max(pounds) > 1e8) # To highlight a certain series above a specified threshold value.
+```
+
+#### Read in data from a URL, 'lubridate()', 'mutate()', and make a graph with months in logical order
+
+```{r}
+monroe_wt <- read_csv("https://data.bloomington.in.gov/dataset/2c81cfe3-62c2-46ed-8fcf-83c1880301d1/resource/13c8f7aa-af51-4008-80a9-56415c7c931e/download/mwtpdailyelectricitybclear.csv") %>% 
+  clean_names()
+
+monroe_ts <- monroe_wt %>% 
+  mutate(date = mdy(date)) %>% 
+  mutate(record_month = month(date)) %>% 
+  mutate(month_name = month.abb[record_month]) %>% # To add a column with the appropriate abbreviation for each corresponding month number.
+  mutate(month_name = fct_reorder(month_name, 
+                                  record_month)) # To reorder the abbreviated months column so that the below graph results in the x-axis values being in chronological order (Jan. - Dec.).
+
+ggplot(data = monroe_ts, 
+       aes(month_name, 
+           y = total_k_wh)) + 
+  geom_jitter()
+```
 
 
 
