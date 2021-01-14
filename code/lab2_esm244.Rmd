@@ -1,0 +1,70 @@
+---
+title: "ESM 244 Lab 2"
+author: "Carlos Simms"
+date: "1/14/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Traditional Packages:
+library(tidyverse)
+library(janitor)
+library(palmerpenguins)
+library(here)
+
+# For PCA:
+library(ggfortify)
+
+# For ggplot Customization:
+library(readxl)
+library(gghighlight)
+library(lubridate)
+library(plotly)
+
+# To Make Compound Figures:
+library(patchwork)
+```
+
+## Part 1: PCA With Penguins
+
+```{r}
+penguin_pca <- penguins %>% 
+  select(body_mass_g, 
+         ends_with("_mm")) %>% 
+  drop_na() %>% # To listwise delete all observations with "na".
+  scale() %>% # To change all numerical values to a -1 to 1 decimal scale of similarity.
+  prcomp() # To tell R that the -1 to 1 decimal scale represents principal component values.
+
+penguin_pca$rotation # To view your PC values for each variable.
+
+penguin_complete <- penguins %>% 
+  drop_na(body_mass_g, 
+          ends_with("mm")) # Using the full dataset and then only listwise deleting observations for the variables of interest.
+
+autoplot(penguin_pca, # To create a complete ggplot appropriate to a particular data type.
+         data = penguin_complete, 
+         colour = "species", 
+         loadings = TRUE, # To insert arrows to indicate each PC.
+         loadings.label = TRUE) + # To add the PC names onto each PC arrow.
+  theme_minimal()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
