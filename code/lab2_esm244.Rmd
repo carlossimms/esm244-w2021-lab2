@@ -116,14 +116,33 @@ ggplot(data = monroe_ts,
   geom_jitter()
 ```
 
+## Part 3: Compound Figures With 'patchwork'
 
+```{r}
+graph_a <- ggplot(data = penguins, 
+                  aes(x = body_mass_g, 
+                      y = flipper_length_mm)) + 
+  geom_point()
 
+graph_b <- ggplot(data = penguins, 
+                  aes(x = species, 
+                      y = flipper_length_mm)) + 
+  geom_jitter(aes(colour = species), 
+              show.legend = FALSE)
 
+# Use "|" to put graphs side by side.
+# Use "/" to put graphs one over the other.
+# Use "&" to apply a certain code to all graphs.
 
+graph_c <- (graph_a | 
+              graph_b) / 
+  fish_plot & 
+  theme_dark()
 
+ggsave(here("fig", # To save a specific graph as a .png image file.
+            "graph_c_cs.png"), 
+       width = 5, 
+       height = 6)
+```
 
-
-
-
-
-
+END
